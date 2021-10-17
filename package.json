@@ -1,0 +1,22 @@
+{
+  "name": "web-scrapper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/operezol/web-scrapper.git"
+  },
+  "author": "Oriol Pérez Olivares",
+  "license": "GNU",
+  "bugs": {
+    "url": "https://github.com/operezol/web-scrapper/issues"
+  },
+  "homepage": "https://github.com/operezol/web-scrapper#readme",
+  "dependencies": {
+    "puppeteer": "^10.4.0"
+  }
+}
