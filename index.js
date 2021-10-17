@@ -1,15 +1,25 @@
 const puppeteer = require("puppeteer")
 const domain = "https://www.fxstreet.com"
 let dataList = [{ url: "https://www.fxstreet.com", visited: false, classNameFound: true }]
+const selectorToSearch = "[fxs_name='ktl']";
 
 async function processPage(url) {
     const browser = await puppeteer.launch()
     const page = await browser.newPage()
-    await page.goto(url)
+    await page.goto(url, {
+        waitUntil: 'domcontentloaded',
+        timeout: 0
+    })
 
     let urls = await page.evaluate(() => {
         return Array.from(document.querySelectorAll("a")).map(x => x.href)
     })
+
+    const isSelectorFound = await page.evaluate((selectorToSearch) => {
+        return Array.from(document.querySelectorAll(selectorToSearch)).length
+    }, selectorToSearch)
+
+    if (isSelectorFound > 0) console.log(url)
 
     await browser.close()
 
@@ -28,18 +38,18 @@ async function processPage(url) {
 
     // Set current processed url object classFound visited to true if class is found
     const newUrl = dataList.find(page => page.visited === false);
-    console.log('new url: ',newUrl.url)
     if (newUrl) {
         await processPage(newUrl.url)
+    } else {
+        console.log("All pages evaluated");
     }
 }
 (async () => {
     try {
+        console.log('Searching all pages containing the selector ', selectorToSearch, 'under the domain ', domain)
         const entryUrl = dataList[0].url
-        console.log('entryUrl: ',entryUrl)
         await processPage(entryUrl).catch(err => console.log(err))
-        console.log(dataList)
-    } catch (e) {
-        console.log(e)
+    } catch (err) {
+        console.log(err)
     }
 })();
