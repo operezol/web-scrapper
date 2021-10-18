@@ -1,4 +1,5 @@
 const puppeteer = require("puppeteer")
+fs = require('fs')
 const domain = "https://qa.fxstreet.com"
 let domainPaths = [{ url: domain, visited: false }]
 let foundDomainPaths = []
@@ -54,6 +55,7 @@ async function processPage(url) {
         console.log("All pages evaluated")
         console.log("Summary of found paths:")
         console.log(foundDomainPaths)
+        fs.writeFile('foundUrls.txt', foundDomainPaths.join('\n'))
     }
 }
 (async () => {
