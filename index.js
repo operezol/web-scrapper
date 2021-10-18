@@ -1,11 +1,16 @@
 const puppeteer = require("puppeteer")
-const domain = "https://www.fxstreet.com"
-let dataList = [{ url: "https://www.fxstreet.com", visited: false, classNameFound: true }]
-const selectorToSearch = "[fxs_name='ktl']";
+const domain = "https://qa.fxstreet.com"
+let domainPaths = [{ url: domain, visited: false }]
+let foundDomainPaths = []
+const selectorToSearch = "[class*='fxs_flexbox']";
 
 async function processPage(url) {
+
+    console.log('Searching in: ', url);
+
     const browser = await puppeteer.launch()
     const page = await browser.newPage()
+
     await page.goto(url, {
         waitUntil: 'domcontentloaded',
         timeout: 0
@@ -19,7 +24,12 @@ async function processPage(url) {
         return Array.from(document.querySelectorAll(selectorToSearch)).length
     }, selectorToSearch)
 
-    if (isSelectorFound > 0) console.log(url)
+    if (isSelectorFound > 0) { 
+        console.log('found') 
+        foundDomainPaths.push(url)
+    } else { 
+        console.log('not found') 
+    }
 
     await browser.close()
 
@@ -31,23 +41,25 @@ async function processPage(url) {
     })
 
     urls.forEach(url => {
-        const found = dataList.some(item => item.url === url)
-        if (!found) dataList.push({ url: url, visited: false, classNameFound: true })
+        const found = domainPaths.some(item => item.url === url)
+        if (!found) domainPaths.push({ url: url, visited: false })
     })
-    dataList[dataList.findIndex(item => item.url === url)] = { url: url, visited: true, classNameFound: true };
 
-    // Set current processed url object classFound visited to true if class is found
-    const newUrl = dataList.find(page => page.visited === false);
+    domainPaths[domainPaths.findIndex(item => item.url === url)] = { url: url, visited: true };
+
+    const newUrl = domainPaths.find(page => page.visited === false)
     if (newUrl) {
         await processPage(newUrl.url)
     } else {
-        console.log("All pages evaluated");
+        console.log("All pages evaluated")
+        console.log("Summary of found paths:")
+        console.log(foundDomainPaths)
     }
 }
 (async () => {
     try {
         console.log('Searching all pages containing the selector ', selectorToSearch, 'under the domain ', domain)
-        const entryUrl = dataList[0].url
+        const entryUrl = domainPaths[0].url
         await processPage(entryUrl).catch(err => console.log(err))
     } catch (err) {
         console.log(err)
