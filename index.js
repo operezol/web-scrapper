@@ -1,9 +1,9 @@
 const puppeteer = require("puppeteer")
 fs = require('fs')
-const domain = "https://qa.fxstreet.com"
+const domain = "https://www.fxstreet.com/"
 let domainPaths = [{ url: domain, visited: false }]
 let foundDomainPaths = []
-const selectorToSearch = "[class*='fxs_flexbox']";
+const selectorToSearch = ".fxs_alert_live";
 
 async function processPage(url) {
 
@@ -28,13 +28,19 @@ async function processPage(url) {
     if (isSelectorFound > 0) { 
         console.log('found') 
         foundDomainPaths.push(url)
-    } else { 
-        console.log('not found') 
-    }
+    } 
 
     await browser.close()
 
-    urls = urls.filter(url => url.startsWith(domain) || url.startsWith("/")).map(url => {
+    function filterURLs(url){
+        let passFilter = false;
+        if(url.startsWith(domain)||url.startsWith("/")) passFilter=true;
+        if(domainPaths.some(item=>item.url.startsWith( domain + 'company/')) &&( url.startsWith( domain + 'company/') ||  url.startsWith( '/company/')))passFilter=false;
+        if(domainPaths.some(item=>item.url.startsWith( domain + 'author/')) &&( url.startsWith( domain + 'author/') ||  url.startsWith( '/author/')))passFilter=false;
+        return passFilter;
+    }
+
+    urls = urls.filter(filterURLs).map(url => {
         url = url.includes('#') ? url.substring(0, url.indexOf('#')) : url
         url = url.includes('?') ? url.substring(0, url.indexOf('?')) : url
         if (url.startsWith(domain)) return url
