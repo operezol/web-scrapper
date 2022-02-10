@@ -1,4 +1,4 @@
-#WEB SCRAPPER CLI
+# WEB SCRAPPER CLI
 
 It takes a domain parameter and a DOM query
 
